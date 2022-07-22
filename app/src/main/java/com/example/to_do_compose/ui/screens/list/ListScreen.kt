@@ -1,27 +1,49 @@
 package com.example.to_do_compose.ui.screens.list
 
-import androidx.compose.material.FloatingActionButton
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
+import android.util.Log
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import com.example.to_do_compose.R
 import com.example.to_do_compose.ui.theme.fabBackgroundColor
+import com.example.to_do_compose.ui.viewmodels.SharedViewModel
+import com.example.to_do_compose.util.SearchAppBarState
+import androidx.compose.runtime.LaunchedEffect as LaunchedEffect
 
+@ExperimentalMaterialApi
 @Composable
 fun ListScreen(
-    navigateToTaskScreen: (taskId: Int) -> Unit
+    navigateToTaskScreen: (taskId: Int) -> Unit,
+    sharedViewModel: SharedViewModel
 ) {
+    LaunchedEffect(key1 = true ) {
+        sharedViewModel.getAllTasks()
+    }
+
+    val allTasks by sharedViewModel.allTasks.collectAsState()
+    val searchAppBarState: SearchAppBarState
+            by sharedViewModel.searchAppBarState
+    val searchTextState: String by sharedViewModel.searchTextState
+
     Scaffold(
         topBar = {
-            ListAppBar()
+            ListAppBar(
+                sharedViewModel = sharedViewModel,
+                searchAppBarState = searchAppBarState,
+                searchTextState = searchTextState
+            )
         },
-        content = {},
+        content = {
+                  listContent(
+                      tasks = allTasks,
+                      navigateToTaskScreen = navigateToTaskScreen
+                  )
+        },
         floatingActionButton = {
             ListFab(onFabClicked = navigateToTaskScreen)
         }
@@ -40,15 +62,10 @@ fun ListFab(
     ) {
         Icon(
             imageVector = Icons.Filled.Add,
-            contentDescription = stringResource(id = R.string.add_button
+            contentDescription = stringResource(
+                id = R.string.add_button
             ),
             tint = Color.White
         )
     }
-}
-
-@Composable
-@Preview
-private fun ListScreenPreview() {
-    ListScreen(navigateToTaskScreen = {})
 }
